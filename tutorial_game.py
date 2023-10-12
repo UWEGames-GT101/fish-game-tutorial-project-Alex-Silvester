@@ -59,7 +59,7 @@ class MyASGEGame(pyasge.ASGEGame):
         self.fish = pyasge.Sprite()
         self.initFish()
 
-        self.direction = 1
+        self.speed = 0
 
     def initBackground(self) -> bool:
         if self.data.background.loadTexture("/data/images/background.png"):
@@ -109,6 +109,7 @@ class MyASGEGame(pyasge.ASGEGame):
             if isInside(self.fish, event.x, event.y):
                 self.data.score += 1
                 self.scoreboard.string = str(self.data.score).zfill(6)
+                self.fish.speed += 0.2
                 self.spawn()
 
     def keyHandler(self, event: pyasge.KeyEvent) -> None:
@@ -148,10 +149,10 @@ class MyASGEGame(pyasge.ASGEGame):
             # update the menu here
             pass
         else:
-
-            if self.fish.x == 0 or self.fish.x == 1600 - self.fish.width:
-                self.direction *= -1
             self.fish.x += self.direction
+            if self.fish.x >= 1600
+                self.fish.x = -self.fish.width
+                self.fish.y = random.randint(0, self.data.game_res[1] - self.fish.height)
             pass
 
     def render(self, game_time: pyasge.GameTime) -> None:
