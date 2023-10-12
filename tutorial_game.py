@@ -1,5 +1,6 @@
 import random
 import pyasge
+import datetime
 from gamedata import GameData
 
 
@@ -60,6 +61,11 @@ class MyASGEGame(pyasge.ASGEGame):
         self.initFish()
 
         self.speed = 0
+        self.start = 0
+
+        self.gameFinished = False
+        self.endGame = None
+        self.initendGame()
 
     def initBackground(self) -> bool:
         if self.data.background.loadTexture("/data/images/background.png"):
@@ -100,17 +106,27 @@ class MyASGEGame(pyasge.ASGEGame):
         self.play_option.position = [100, 400]
         self.play_option.colour = pyasge.COLOURS.HOTPINK
 
-        return True
+    def initendGame(self) -> None:
+        self.endGame = pyasge.Text(self.data.fonts["mainFont"])
+        self.endGame.string = "Game Finished!"
+        self.endGame.position = [500, 400]
+        self.endGame.colour = pyasge.COLOURS.HOTPINK
+
+    def getTime(self):
+        return datetime.datetime.now().second + \
+               datetime.datetime.now().minute * 60 + \
+               datetime.datetime.now().hour * 360
 
     def clickHandler(self, event: pyasge.ClickEvent) -> None:
-        if event.action == pyasge.MOUSE.BUTTON_PRESSED and \
-                event.button == pyasge.MOUSE.MOUSE_BTN1:
+        if not self.gameFinished:
+            if event.action == pyasge.MOUSE.BUTTON_PRESSED and \
+                    event.button == pyasge.MOUSE.MOUSE_BTN1:
 
-            if isInside(self.fish, event.x, event.y):
-                self.data.score += 1
-                self.scoreboard.string = str(self.data.score).zfill(6)
-                self.fish.speed += 0.2
-                self.spawn()
+                if isInside(self.fish, event.x, event.y):
+                    self.data.score += 1
+                    self.scoreboard.string = str(self.data.score).zfill(6)
+                    self.speed += 0.2
+                    self.spawn()
 
     def keyHandler(self, event: pyasge.KeyEvent) -> None:
 
@@ -133,6 +149,7 @@ class MyASGEGame(pyasge.ASGEGame):
             if event.key == pyasge.KEYS.KEY_ENTER:
                 if self.menu_option == 0:
                     self.menu = False
+                    self.start = self.getTime()
                 else:
                     self.signalExit()
 
@@ -149,10 +166,17 @@ class MyASGEGame(pyasge.ASGEGame):
             # update the menu here
             pass
         else:
-            self.fish.x += self.direction
-            if self.fish.x >= 1600
+            if self.getTime() - self.start >= 60:
+                self.gameFinished = True
+
+            if not self.gameFinished:
+                self.fish.x += self.speed
+
+            if self.fish.x >= 1600:
                 self.fish.x = -self.fish.width
                 self.fish.y = random.randint(0, self.data.game_res[1] - self.fish.height)
+                self.data.score -= 1
+                self.scoreboard.string = str(self.data.score).zfill(6)
             pass
 
     def render(self, game_time: pyasge.GameTime) -> None:
@@ -176,6 +200,9 @@ class MyASGEGame(pyasge.ASGEGame):
             self.data.renderer.render(self.data.background)
             self.data.renderer.render(self.scoreboard)
             self.data.renderer.render(self.fish)
+
+            if self.gameFinished:
+                self.data.renderer.render(self.endGame)
             pass
 
 
