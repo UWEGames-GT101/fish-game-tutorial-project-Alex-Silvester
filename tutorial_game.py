@@ -166,7 +166,7 @@ class MyASGEGame(pyasge.ASGEGame):
             # update the menu here
             pass
         else:
-            if self.getTime() - self.start >= 60:
+            if self.getTime() - self.start >= 30:
                 self.gameFinished = True
 
             if not self.gameFinished:
